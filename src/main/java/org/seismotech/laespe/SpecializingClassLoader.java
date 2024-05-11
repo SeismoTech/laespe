@@ -6,21 +6,22 @@ import java.net.URL;
 import com.seismotech.ground.lang.XClass;
 import com.seismotech.ground.io.XStream;
 
-public class HierarchyClassLoader extends ClassLoader {
+public class SpecializingClassLoader extends ClassLoader {
 
-  private final HierarchyRoot root;
+  private final ClassSet toLoad;
 
-  public HierarchyClassLoader(final HierarchyRoot root) {
-    super(root.classLoader());
-    this.root = root;
+  public SpecializingClassLoader(final ClassSet toLoad) {
+    super(toLoad.classLoader());
+    this.toLoad = toLoad;
   }
 
+  @Override
   protected Class<?> loadClass(String name, boolean resolve)
   throws ClassNotFoundException {
     synchronized (getClassLoadingLock(name)) {
       Class<?> klass = findLoadedClass(name);
       if (klass == null) {
-        klass = root.contains(name) ? loadCopy(name)
+        klass = toLoad.contains(name) ? loadCopy(name)
           : super.loadClass(name, false);
       }
       if (resolve) resolveClass(klass);

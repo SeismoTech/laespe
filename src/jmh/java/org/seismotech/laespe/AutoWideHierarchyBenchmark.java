@@ -70,10 +70,10 @@ public class AutoWideHierarchyBenchmark {
   @Setup
   public void doSetup()
   throws Throwable {
-    final HierarchySpecializer hisp
-      = new HierarchySpecializer(Seq.class, Instantiation.class);
-    final HierarchySpecializer hispAbs
-      = new HierarchySpecializer(AbsSeq.class, Instantiation.class);
+    final BoundedSpecializer hisp
+      = new BoundedSpecializer(Seq.class, Instantiation.class);
+    final BoundedSpecializer hispAbs
+      = new BoundedSpecializer(AbsSeq.class, Instantiation.class);
 
     @SuppressWarnings("unchecked")
     final Function<int[],Seq>[] sharedFacts = new Function[poly];

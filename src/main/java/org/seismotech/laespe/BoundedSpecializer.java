@@ -16,33 +16,33 @@ package org.seismotech.laespe;
  * please cache it instead of requesting each time a new specialization
  * to this class.
  */
-public class HierarchySpecializer {
+public class BoundedSpecializer {
 
-  private final HierarchyRoot root;
+  private final ClassSet toSpecialize;
 
-  public HierarchySpecializer(Class<?>... root) {
-    this(new HierarchyRoot(root));
+  public BoundedSpecializer(Class<?>... root) {
+    this(new HierarchyClassSet(root));
   }
 
-  public HierarchySpecializer(HierarchyRoot root) {
-    this.root = root;
+  public BoundedSpecializer(ClassSet toSpecialize) {
+    this.toSpecialize = toSpecialize;
   }
 
   public Class<?> specialized(Class<?> klass)
   throws ClassNotFoundException {
-    return root.contains(klass) ? reload(klass.getName())
+    return toSpecialize.contains(klass) ? reload(klass.getName())
       : unmanagedClassError(klass.getName());
   }
 
   public Class<?> specialized(String classname)
   throws ClassNotFoundException {
-    return root.contains(classname) ? reload(classname)
+    return toSpecialize.contains(classname) ? reload(classname)
       : unmanagedClassError(classname);
   }
 
   private Class<?> reload(String classname)
   throws ClassNotFoundException {
-    return new HierarchyClassLoader(root).loadClass(classname);
+    return new SpecializingClassLoader(toSpecialize).loadClass(classname);
   }
 
   private <T> T unmanagedClassError(String classname)

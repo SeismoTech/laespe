@@ -30,8 +30,8 @@ public class ManualWideHierarchyBenchmark {
   @Setup
   public void doSetup()
   throws Throwable {
-    final HierarchySpecializer hisp
-      = new HierarchySpecializer(Seq.class, Instantiation.class);
+    final BoundedSpecializer hisp
+      = new BoundedSpecializer(Seq.class, Instantiation.class);
 
     final Class<?> byteSeqClass = hisp.specialized(ByteSeq.class);
     final Class<?> shortSeqClass = hisp.specialized(ShortSeq.class);

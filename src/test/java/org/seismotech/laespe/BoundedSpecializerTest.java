@@ -10,13 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.seismotech.laespe.example.widehierarchy.*;
 
-class HierarchySpecializerTest {
+class BoundedSpecializerTest {
 
   @Test
   void wideHierarchyTest()
   throws Exception {
-    final HierarchySpecializer hisp
-      = new HierarchySpecializer(Seq.class);
+    final BoundedSpecializer hisp
+      = new BoundedSpecializer(Seq.class);
 
     assertEquals(AbsSeq.class, IntSeq.class.getSuperclass());
 
@@ -40,8 +40,8 @@ class HierarchySpecializerTest {
   @Test
   void wideHierarchyFactoryTest()
   throws Throwable {
-    final HierarchySpecializer hisp1
-      = new HierarchySpecializer(Seq.class);
+    final BoundedSpecializer hisp1
+      = new BoundedSpecializer(Seq.class);
     final Class<?> intSeqClass1 = hisp1.specialized(IntSeq.class);
     @SuppressWarnings("unchecked")
     final Function<int[],Seq> fact1 = Instantiation.fastFactory(
@@ -50,8 +50,8 @@ class HierarchySpecializerTest {
     assertFalse(intSeqClass1.isInstance(xs1));
     assertTrue(xs1 instanceof IntSeq);
 
-    final HierarchySpecializer hisp2
-      = new HierarchySpecializer(Instantiation.class, Seq.class);
+    final BoundedSpecializer hisp2
+      = new BoundedSpecializer(Instantiation.class, Seq.class);
     final Class<?> intSeqClass2 = hisp2.specialized(IntSeq.class);
     @SuppressWarnings("unchecked")
     final Function<int[],Seq> fact2 = Instantiation.fastFactory(
