@@ -2,36 +2,36 @@ package org.seismotech.laespe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.invoke.LambdaConversionException;
 import java.lang.invoke.MethodType;
 import static java.lang.invoke.MethodType.methodType;
+import java.lang.invoke.CallSite;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.LambdaMetafactory;
+import java.util.Arrays;
 
 /**
  * An utility interface for object instantiation.
- *
- * <p>To use this on a specialized class returned by
- * {@link HierarchySpecializer},
- * {@code Instantiation.class} must be added to the hierarchy roots.
- * Otherwise, this 
  */
 public interface Instantiation {
-  
-  static Instantiation forClass(Class<?> klass)
-  throws ClassNotFoundException, NoSuchMethodException,
-  InstantiationException, IllegalAccessException, InvocationTargetException {
-    //return new Fast();
-    return (Instantiation) klass.getClassLoader()
-      .loadClass(Fast.class.getName())
-      .getConstructor()
-      .newInstance();
-  }
-  
+
+  /**
+   * <p>To use this on a specialized class returned by
+   * {@link HierarchySpecializer},
+   * {@code Instantiation.Metafactory.class} must be added to
+   * the specialized class set
+   * (typically adding {@code Instantiation.class} as a root to a
+   * {@link HierarchyClassSet}).
+   * Otherwise, this factory will search homonymous class in its class loader,
+   * returning a factory for the original class instead of the specialized one.
+   * See {@link BoundedSpecializerTest#wideHierarchyFactoryTest}
+   * for an example avoiding or adding {@code Instantiation.class}.
+   */
   static <T> T fastFactory(Class<?> objClass,
       Class<T> factClass, String factMethodName, Class<?>... argTypes)
-  throws Throwable {
-    return forClass(objClass)
+  throws InstantiationRelatedException {
+    return Metafactory.forClass(objClass)
       .factory(objClass, factClass, factMethodName, argTypes);
   }
 
@@ -48,10 +48,28 @@ public interface Instantiation {
    */
   <T> T factory(Class<?> objClass,
       Class<T> factClass, String factMethodName, Class<?>... argTypes)
-  throws Throwable;
+  throws InstantiationRelatedException;
 
   //----------------------------------------------------------------------
-  static class Fast implements Instantiation {
+  static class Metafactory implements Instantiation {
+
+    public static Instantiation forClass(Class<?> klass)
+    throws InstantiationRelatedException {
+      //return new Metafactory();
+      try {
+        return (Instantiation) klass.getClassLoader()
+          .loadClass(Metafactory.class.getName())
+          .getConstructor()
+          .newInstance();
+      } catch (ClassNotFoundException | NoSuchMethodException
+          | InstantiationException | IllegalAccessException
+          | InvocationTargetException e) {
+        throw new InstantiationRelatedException(
+          "While creating Instantiation.Metafactory for class "
+          + klass.getName() + ": " + e.getMessage(), e);
+      }
+    }
+
     /**
      * Dynamically construct a lambda to invoke a constructor.
      * The lambda will implement the method {@code factMethodName}
@@ -81,7 +99,7 @@ public interface Instantiation {
     @Override
     public <T> T factory(Class<?> objClass,
         Class<T> factClass, String factMethodName, Class<?>... argTypes)
-    throws Throwable {
+    throws InstantiationRelatedException {
       final Method factMethod
         = findMethod(factClass, factMethodName, argTypes.length);
       final MethodType constType = methodType(void.class, argTypes);
@@ -91,17 +109,40 @@ public interface Instantiation {
       //Fails with *Invalid caller*
       //final MethodHandles.Lookup lookup = MethodHandles.lookup().in(objClass);
       final MethodHandles.Lookup lookup = MethodHandles.lookup();
-      final MethodHandle constHandle
-        = lookup.findConstructor(objClass, constType);
-      final Object fact
-        = LambdaMetafactory.metafactory(
+      final MethodHandle constHandle;
+      try {
+        constHandle = lookup.findConstructor(objClass, constType);
+      } catch (NoSuchMethodException | IllegalAccessException e) {
+        throw new InstantiationRelatedException(
+          "While locating constructor of " + objClass.getName()
+          + " with signature " + constType + ": " + e.getMessage(), e);
+      }
+      final CallSite csite;
+      try {
+        csite = LambdaMetafactory.metafactory(
           lookup,
           factMethodName,
           methodType(factClass),
           declType,
           constHandle,
-          callType)
-        .getTarget().invoke();
+          callType);
+      } catch (LambdaConversionException e) {
+        throw new InstantiationRelatedException(
+          "While creating a lambda metafactory for " + objClass.getName()
+          + " implementing interace " + factClass.getName()
+          + ", method " + factMethodName + "(" +Arrays.toString(argTypes)+ ")"
+          + ": " + e.getMessage(), e);
+      }
+      final Object fact;
+      try {
+        fact = csite.getTarget().invoke();
+      } catch (Throwable e) {
+        throw new InstantiationRelatedException(
+          "While creating a lambda for " + objClass.getName()
+          + " implementing interace " + factClass.getName()
+          + ", method " + factMethodName + "(" +Arrays.toString(argTypes)+ ")"
+          + ": " + e.getMessage(), e);
+      }
       return factClass.cast(fact);
     }
 
@@ -119,5 +160,5 @@ public interface Instantiation {
         "Cannot find a method named `" + name + "` with arity " + arity);
       return method;
     }
-  }   
+  }
 }

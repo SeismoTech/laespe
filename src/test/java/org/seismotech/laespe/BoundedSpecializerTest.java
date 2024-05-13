@@ -14,7 +14,7 @@ class BoundedSpecializerTest {
 
   @Test
   void wideHierarchyTest()
-  throws Exception {
+  throws ClassNotFoundException {
     final BoundedSpecializer hisp
       = new BoundedSpecializer(Seq.class);
 
@@ -39,7 +39,7 @@ class BoundedSpecializerTest {
 
   @Test
   void wideHierarchyFactoryTest()
-  throws Throwable {
+  throws ClassNotFoundException, InstantiationRelatedException {
     final BoundedSpecializer hisp1
       = new BoundedSpecializer(Seq.class);
     final Class<?> intSeqClass1 = hisp1.specialized(IntSeq.class);

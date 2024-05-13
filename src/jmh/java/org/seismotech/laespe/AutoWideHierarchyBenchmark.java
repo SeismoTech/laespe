@@ -1,6 +1,5 @@
 package org.seismotech.laespe;
 
-import java.lang.reflect.Constructor;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -69,7 +68,7 @@ public class AutoWideHierarchyBenchmark {
 
   @Setup
   public void doSetup()
-  throws Throwable {
+  throws ClassNotFoundException, InstantiationRelatedException {
     final BoundedSpecializer hisp
       = new BoundedSpecializer(Seq.class, Instantiation.class);
     final BoundedSpecializer hispAbs
