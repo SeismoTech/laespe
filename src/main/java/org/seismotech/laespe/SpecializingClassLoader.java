@@ -3,8 +3,8 @@ package org.seismotech.laespe;
 import java.io.IOException;
 import java.net.URL;
 
-import com.seismotech.ground.lang.XClass;
-import com.seismotech.ground.io.XStream;
+import org.seismotech.ground.lang.XClass;
+import org.seismotech.ground.io.XStream;
 
 public class SpecializingClassLoader extends ClassLoader {
 
