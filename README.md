@@ -12,7 +12,7 @@ an intermediate abstract class `A` partially implementing `I`
 and multiple implementation classes `C1`, ..., `Cn` extending `A`.
 There is a method `I::m` implemented in `A`
 that *heavily* uses other `I` methods not implemented in `A`.
-By *heavily* we mean, for instance, that those site calls are nested
+By *heavily* we mean, for instance, that those call sites are nested
 inside a loop.
 We are going to call that megamorphic call sites
 *hard megamorphic* or having *hard megamorphims*.

@@ -19,12 +19,12 @@ import org.seismotech.laespe.example.widehierarchy.*;
  * <p>Another approach is to do a recursive walk of the array.
  * That is not going to be better.
  * Except if we create a new class for each step and link them so that
- * the recursive call is, in fact, a call to a copy of itserf in another
+ * the recursive call is, in fact, a call to a copy of itself in another
  * class.
  * We will call *forward calls* to these pseudo-recursive calls;
  * forward calls are recursive calls to the same method in another
  * specialization of the class.
- * A good compiler will discover that all that forward calls are monomorphic
+ * A good compiler will discover that all those forward calls are monomorphic
  * and inlineable.
  *
  * <p>This approach is sensible even for long arrays.
