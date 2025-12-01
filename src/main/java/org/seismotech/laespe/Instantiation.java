@@ -75,7 +75,7 @@ public interface Instantiation {
      * The lambda will implement the method {@code factMethodName}
      * with arity {@code argTypes.length}
      * of functional interface {@code factClass}.
-     * The emitted lambda is expected be called with argument types
+     * The emitted lambda is expected to be called with argument types
      * {@code argTypes},
      * and it is assumed (not checked) that those types can be assigned to
      * actual {@code factMethodName} arguments.
