@@ -17,16 +17,17 @@ import org.openjdk.jmh.annotations.*;
  * Linux, turbo disabled.
  *
  * JDK 23
-_new                    thrpt    2  291285772.987          ops/s
-constructorNewInstance  thrpt    2   68648468.351          ops/s
-dynBoxedLambda          thrpt    2  260390319.320          ops/s
-dynLambda               thrpt    2  281405936.692          ops/s
-dynSpookyLambda         thrpt    2  282433484.206          ops/s
-handleInvoke            thrpt    2  114628766.520          ops/s
-handleInvokeExact       thrpt    2  125449350.854          ops/s
-instLambda              thrpt    2  288471051.641          ops/s
-lambda                  thrpt    2  288239074.938          ops/s
-proxyLambda             thrpt    2  116778350.705          ops/s
+_new                    thrpt    2  289867236.597          ops/s
+constructorNewInstance  thrpt    2   70468363.807          ops/s
+dynBoxedLambda          thrpt    2  266606213.076          ops/s
+dynLambda               thrpt    2  289007818.792          ops/s
+dynMetaLambda           thrpt    2  109934488.816          ops/s
+dynSpookyLambda         thrpt    2  281545911.042          ops/s
+handleInvoke            thrpt    2  112214871.798          ops/s
+handleInvokeExact       thrpt    2  126618638.360          ops/s
+instLambda              thrpt    2  287959982.403          ops/s
+lambda                  thrpt    2  289150196.199          ops/s
+proxyLambda             thrpt    2  118132787.451          ops/s
  */
 @Fork(value = 1)
 @Warmup(iterations = 3, time = 1000, timeUnit = TimeUnit.MILLISECONDS)
@@ -49,6 +50,7 @@ public class InstanceBenchmark {
   IntFunction<MyObject> dynLambda;
   Object dynSpookyLambda;
   Function<Integer,MyObject> dynBoxedLambda;
+  IntFunction<MyObject> dynMetaLambda;
   IntFunction<MyObject> instLambda;
 
   @Setup
@@ -95,6 +97,16 @@ public class InstanceBenchmark {
         MethodType.methodType(MyObject.class, Integer.class))
       .getTarget().invokeExact();
 
+    dynMetaLambda = (IntFunction<MyObject>)
+      LambdaMetafactory.metafactory(
+        MethodHandles.lookup(),
+        "apply",
+        MethodType.methodType(IntFunction.class, MethodHandle.class),
+        MethodType.methodType(Object.class, int.class),
+        MethodHandles.exactInvoker(applyType),
+        applyType)
+      .getTarget().invokeExact(constHandle);
+
     @SuppressWarnings("unchecked")
     final IntFunction<MyObject> inst = Instantiation.fastFactory(
       MyObject.class, IntFunction.class, "apply", int.class);
@@ -130,6 +142,11 @@ public class InstanceBenchmark {
   @Benchmark
   public Object dynBoxedLambda() {
     return dynBoxedLambda.apply(x);
+  }
+
+  @Benchmark
+  public Object dynMetaLambda() {
+    return dynMetaLambda.apply(x);
   }
 
   @Benchmark
